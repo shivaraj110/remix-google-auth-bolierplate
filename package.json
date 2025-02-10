@@ -16,17 +16,14 @@
     "@remix-run/react": "^2.15.3",
     "@remix-run/serve": "^2.15.3",
     "@types/express": "^5.0.0",
-    "@types/ws": "^8.5.14",
     "express": "^4.21.2",
     "isbot": "^4.1.0",
     "prisma": "^6.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "remix-auth": "^3.7.0",
-    "remix-auth-auth0": "^1.10.0",
     "remix-auth-google": "^2.0.0",
-    "tsx": "^4.19.2",
-    "ws": "^8.18.0"
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.15.3",
