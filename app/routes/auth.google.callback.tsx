@@ -3,7 +3,7 @@ import { authenticator } from "~/utils/auth.server";
 
 export const loader = ({ request }: LoaderFunctionArgs) => {
   return authenticator.authenticate("google", request, {
-    successRedirect: "/",
+    successRedirect: "/home",
     failureRedirect: "/login",
   });
 };
