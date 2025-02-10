@@ -1,24 +1,53 @@
 import { Authenticator } from "remix-auth";
-import { Auth0Strategy } from "remix-auth-auth0";
-interface User {
-	name: String
-	email: String
-}
-// Create an instance of the authenticator, pass a generic with what your
-// strategies will return and will be stored in the session
-export const authenticator = new Authenticator<User>(sessionStorage);
+import { GoogleStrategy } from "remix-auth-google";
+import { createCookieSessionStorage } from "@remix-run/node";
+import { PrismaClient, User } from "@prisma/client";
 
-let auth0Strategy = new Auth0Strategy(
-	{
-		callbackURL: "http://localhost:5173/auth/auth0/callback",
-		clientID: process.env.GOOGLE_CLIENT_ID!,
-		clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-		domain: "google.us.auth0.com",
-	},
-	async ({ accessToken, refreshToken, extraParams, profile }) => {
-		// Get the user data from your DB or API using the tokens and profile
-		return User.findOrCreate({ email: profile.emails[0].value });
-	},
+// Configure session storage
+export let sessionStorage = createCookieSessionStorage({
+  cookie: {
+    name: "_session",
+    sameSite: "lax",
+    path: "/",
+    httpOnly: true,
+    secrets: [process.env.SESSION_SECRET!],
+    secure: process.env.NODE_ENV === "production",
+  },
+});
+
+export const authenticator = new Authenticator<User>(sessionStorage);
+const prisma = new PrismaClient();
+
+
+const googleStrategy = new GoogleStrategy(
+  {
+    clientID: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    callbackURL: "http://localhost:5173/auth/google/callback",
+  },
+  async ({ accessToken, refreshToken, extraParams, profile }) => {
+    // Here, implement logic to find or create a user in your database
+    // Example:
+    const user = await findOrCreateUser({
+      email: profile.emails[0].value,
+      name: profile.displayName,
+        avatar: profile.photos?.[0]?.value,
+        profileId: profile.id,
+    });
+    return user;
+  }
 );
 
-authenticator.use(auth0Strategy);
+authenticator.use(googleStrategy);
+
+async function findOrCreateUser({ email, name, avatar ,profileId}: { email: string; name: string; avatar?: string ,profileId: string}) {
+const user = prisma.user.upsert({
+    where: { email },
+    update: {
+        username: name,
+        avatar: avatar,
+     },
+    create: { email, username: name, avatar: avatar, provider: "GOOGLE" , providerId: profileId },
+});
+return user;
+}
