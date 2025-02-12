@@ -3,7 +3,7 @@ import type {
   LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
-import { redirect } from "@remix-run/react";
+import { redirect, useLoaderData } from "@remix-run/react";
 import { authenticator } from "~/utils/auth.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -24,9 +24,10 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Home() {
+  const { user } = useLoaderData<typeof loader>();
   return (
     <div className="flex h-screen items-center justify-center">
-      {"User logged in!"}
+      {"Hi there " + user?.username}
       <form method="post">
         <button type="submit">Logout</button>
       </form>
