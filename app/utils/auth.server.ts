@@ -1,7 +1,6 @@
 import { Authenticator } from "remix-auth";
 import { GoogleStrategy } from "remix-auth-google";
 import { createCookieSessionStorage } from "@remix-run/node";
-import { PrismaClient, User } from "@prisma/client";
 
 // Configure session storage
 export let sessionStorage = createCookieSessionStorage({
@@ -15,8 +14,7 @@ export let sessionStorage = createCookieSessionStorage({
   },
 });
 
-export const authenticator = new Authenticator<User>(sessionStorage);
-const prisma = new PrismaClient();
+export const authenticator = new Authenticator<any>(sessionStorage);
 
 
 const googleStrategy = new GoogleStrategy(
@@ -41,13 +39,6 @@ const googleStrategy = new GoogleStrategy(
 authenticator.use(googleStrategy);
 
 async function findOrCreateUser({ email, name, avatar ,profileId}: { email: string; name: string; avatar?: string ,profileId: string}) {
-const user = prisma.user.upsert({
-    where: { email },
-    update: {
-        username: name,
-        avatar: avatar,
-     },
-    create: { email, username: name, avatar: avatar, provider: "GOOGLE" , providerId: profileId },
-});
+const user = name    
 return user;
 }
